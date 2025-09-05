@@ -402,6 +402,118 @@ class StreamlitMiniGames:
 
    #Word_scramble 
     
+
+    def word_scramble_game(self):
+        """
+        Beautiful Word Scramble Game with Streamlit
+        Author: Rishika
+        """
+        st.markdown("## 🔤 Word Scramble Game")
+        st.markdown("*Unscramble the letters to form the original word!*")
+        
+        # Word lists
+        word_lists = {
+            "Easy 🟢": ["cat", "dog", "sun", "car", "book", "tree", "fish", "bird"],
+            "Medium 🟡": ["python", "computer", "keyboard", "program", "function", "variable"],
+            "Hard 🔴": ["programming", "algorithm", "collaboration", "development", "repository"]
+        }
+        
+        # Initialize game state
+        if 'scramble_game' not in st.session_state:
+            st.session_state.scramble_game = {
+                'current_word': '',
+                'scrambled_word': '',
+                'score': 0,
+                'round': 1,
+                'total_rounds': 5,
+                'difficulty': 'Easy 🟢',
+                'start_time': 0,
+                'game_active': False
+            }
+        
+        game = st.session_state.scramble_game
+        
+        # Difficulty selection
+        col1, col2 = st.columns([2, 1])
+        with col1:
+            difficulty = st.selectbox("Choose Difficulty:", list(word_lists.keys()), 
+                                    index=list(word_lists.keys()).index(game['difficulty']))
+            game['difficulty'] = difficulty
+        
+        with col2:
+            st.metric("Current Score", game['score'])
+        
+        # Game controls
+        if not game['game_active']:
+            if st.button("🎮 Start New Game", use_container_width=True):
+                game['current_word'] = random.choice(word_lists[difficulty])
+                game['scrambled_word'] = self.scramble_word(game['current_word'])
+                game['start_time'] = time.time()
+                game['game_active'] = True
+                game['round'] = 1
+                game['score'] = 0
+                st.rerun()
+        
+        if game['game_active']:
+            # Progress indicator
+            progress = (game['round'] - 1) / game['total_rounds']
+            st.progress(progress, text=f"Round {game['round']}/{game['total_rounds']}")
+            
+            # Display scrambled word
+            st.markdown(f"""
+            <div style="text-align: center; padding: 2rem; background: linear-gradient(135deg, #a8edea, #fed6e3); border-radius: 15px; margin: 2rem 0;">
+                <h1 style="font-size: 3rem; letter-spacing: 10px; color: #2d3436;">{game['scrambled_word'].upper()}</h1>
+                <p>Unscramble this word!</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Input and submit
+            col1, col2 = st.columns([3, 1])
+            with col1:
+                user_guess = st.text_input("Your guess:", key=f"scramble_guess_{game['round']}")
+            
+            with col2:
+                if st.button("✅ Submit"):
+                    if user_guess.lower() == game['current_word'].lower():
+                        time_taken = time.time() - game['start_time']
+                        points = max(20 - int(time_taken), 5)
+                        game['score'] += points
+                        
+                        st.success(f"🎉 Correct! +{points} points")
+                        
+                        if game['round'] < game['total_rounds']:
+                            game['round'] += 1
+                            game['current_word'] = random.choice(word_lists[difficulty])
+                            game['scrambled_word'] = self.scramble_word(game['current_word'])
+                            game['start_time'] = time.time()
+                            time.sleep(1)
+                            st.rerun()
+                        else:
+                            game['game_active'] = False
+                            self.update_stats('Word Scramble', game['score'])
+                            st.markdown('<div class="winner-animation">🏆 Game Complete!</div>', unsafe_allow_html=True)
+                            st.balloons()
+                    else:
+                        st.error(f"❌ Wrong! The word was: {game['current_word']}")
+                        if game['round'] < game['total_rounds']:
+                            game['round'] += 1
+                            game['current_word'] = random.choice(word_lists[difficulty])
+                            game['scrambled_word'] = self.scramble_word(game['current_word'])
+                            game['start_time'] = time.time()
+                            time.sleep(1)
+                            st.rerun()
+                        else:
+                            game['game_active'] = False
+                            self.update_stats('Word Scramble', game['score'])
+    
+    def scramble_word(self, word):
+        """Scramble the letters of a word"""
+        scrambled = list(word)
+        random.shuffle(scrambled)
+        # Ensure the scrambled word is different from original
+        while ''.join(scrambled) == word and len(word) > 1:
+            random.shuffle(scrambled)
+        return ''.join(scrambled)
     
 
     ## quiz gamee
