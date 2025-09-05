@@ -398,7 +398,100 @@ class StreamlitMiniGames:
 
 
   # rock_paper_scissors
-
+def rock_paper_scissors(self):
+        """
+        Beautiful Rock Paper Scissors with Streamlit
+        Author: Rishabh
+        """
+        st.markdown("## ✂️ Rock Paper Scissors")
+        st.markdown("*Choose your weapon and battle the computer!*")
+        
+        # Initialize game state
+        if 'rps_game' not in st.session_state:
+            st.session_state.rps_game = {
+                'player_wins': 0,
+                'computer_wins': 0,
+                'draws': 0,
+                'game_history': []
+            }
+        
+        game = st.session_state.rps_game
+        choices = ["🪨 Rock", "📄 Paper", "✂️ Scissors"]
+        choice_map = {"🪨 Rock": "rock", "📄 Paper": "paper", "✂️ Scissors": "scissors"}
+        
+        # Score display
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("🎮 Your Wins", game['player_wins'])
+        with col2:
+            st.metric("🤖 Computer Wins", game['computer_wins'])
+        with col3:
+            st.metric("🤝 Draws", game['draws'])
+        
+        # Game interface
+        st.markdown("### Make Your Choice:")
+        selected_choice = st.radio("", choices, horizontal=True, key="rps_choice")
+        
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            if st.button("⚔️ BATTLE!", key="rps_battle", use_container_width=True):
+                player_choice = choice_map[selected_choice]
+                computer_choice = random.choice(["rock", "paper", "scissors"])
+                
+                # Determine winner
+                result = self.determine_rps_winner(player_choice, computer_choice)
+                
+                if result == "draw":
+                    game['draws'] += 1
+                    result_text = "🤝 It's a draw!"
+                    result_color = "blue"
+                    score = 5
+                elif result == "win":
+                    game['player_wins'] += 1
+                    result_text = "🎉 You win!"
+                    result_color = "green"
+                    score = 10
+                else:
+                    game['computer_wins'] += 1
+                    result_text = "🤖 Computer wins!"
+                    result_color = "red"
+                    score = 0
+                
+                self.update_stats('Rock Paper Scissors', score)
+                
+                # Display result with animation
+                computer_emoji = {"rock": "🪨", "paper": "📄", "scissors": "✂️"}
+                
+                st.markdown(f"""
+                <div style="text-align: center; padding: 2rem; background: linear-gradient(135deg, #ffeaa7, #fab1a0); border-radius: 15px; margin: 1rem 0;">
+                    <h2>You: {selected_choice} VS Computer: {computer_emoji[computer_choice]} {computer_choice.title()}</h2>
+                    <h1 style="color: {result_color};">{result_text}</h1>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                game['game_history'].append({
+                    'player': player_choice,
+                    'computer': computer_choice,
+                    'result': result
+                })
+        
+        # Game history
+        if game['game_history']:
+            st.markdown("### 📊 Recent Games:")
+            recent_games = game['game_history'][-5:]  # Show last 5 games
+            df = pd.DataFrame(recent_games)
+            st.dataframe(df, use_container_width=True)
+    
+    def determine_rps_winner(self, player_choice, computer_choice):
+        """Determine Rock Paper Scissors winner"""
+        if player_choice == computer_choice:
+            return "draw"
+        elif (player_choice == "rock" and computer_choice == "scissors") or \
+             (player_choice == "paper" and computer_choice == "rock") or \
+             (player_choice == "scissors" and computer_choice == "paper"):
+            return "win"
+        else:
+            return "lose"
 
    #Word_scramble 
     
