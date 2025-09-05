@@ -695,6 +695,123 @@ class StreamlitMiniGames:
                 st.rerun()
     
 #tic tac toe
+    def tic_tac_toe(self):
+        """
+        Beautiful Tic-Tac-Toe with Streamlit
+        Author: Rahul Trimukhe
+        """
+        st.markdown("## ❌⭕ Tic-Tac-Toe")
+        st.markdown("*Classic game for two players!*")
+        
+        # Initialize game state
+        if 'ttt_game' not in st.session_state:
+            st.session_state.ttt_game = {
+                'board': [' '] * 9,
+                'current_player': 'X',
+                'game_over': False,
+                'winner': None,
+                'x_wins': 0,
+                'o_wins': 0,
+                'draws': 0
+            }
+        
+        game = st.session_state.ttt_game
+        
+        # Score display
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("❌ X Wins", game['x_wins'])
+        with col2:
+            st.metric("⭕ O Wins", game['o_wins'])
+        with col3:
+            st.metric("🤝 Draws", game['draws'])
+        
+        # Current player indicator
+        if not game['game_over']:
+            st.markdown(f"""
+            <div style="text-align: center; padding: 1rem; background: linear-gradient(135deg, #6c5ce7, #a29bfe); 
+                        border-radius: 10px; margin: 1rem 0;">
+                <h2 style="color: white;">Current Player: {game['current_player']}</h2>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        # Game board
+        st.markdown("### Game Board:")
+        
+        # Create 3x3 grid
+        for row in range(3):
+            cols = st.columns(3)
+            for col in range(3):
+                position = row * 3 + col
+                cell_value = game['board'][position]
+                
+                # Display cell content with beautiful styling
+                if cell_value == ' ':
+                    display_value = str(position + 1)
+                    button_style = "background: linear-gradient(135deg, #ddd6fe, #e0e7ff);"
+                else:
+                    display_value = cell_value
+                    if cell_value == 'X':
+                        button_style = "background: linear-gradient(135deg, #fecaca, #f87171);"
+                    else:
+                        button_style = "background: linear-gradient(135deg, #bfdbfe, #60a5fa);"
+                
+                with cols[col]:
+                    if st.button(
+                        display_value,
+                        key=f"cell_{position}",
+                        disabled=game['board'][position] != ' ' or game['game_over'],
+                        use_container_width=True
+                    ):
+                        game['board'][position] = game['current_player']
+                        
+                        # Check for winner
+                        winner = self.check_ttt_winner(game['board'])
+                        if winner:
+                            game['winner'] = winner
+                            game['game_over'] = True
+                            if winner == 'X':
+                                game['x_wins'] += 1
+                            else:
+                                game['o_wins'] += 1
+                            self.update_stats('Tic-Tac-Toe', 10)
+                        elif ' ' not in game['board']:
+                            game['game_over'] = True
+                            game['winner'] = 'Draw'
+                            game['draws'] += 1
+                            self.update_stats('Tic-Tac-Toe', 5)
+                        else:
+                            game['current_player'] = 'O' if game['current_player'] == 'X' else 'X'
+                        
+                        st.rerun()
+        
+        # Game result
+        if game['game_over']:
+            if game['winner'] == 'Draw':
+                st.markdown('<div class="winner-animation">🤝 It\'s a Draw!</div>', unsafe_allow_html=True)
+            else:
+                st.markdown(f'<div class="winner-animation">🎉 Player {game["winner"]} Wins!</div>', unsafe_allow_html=True)
+                st.balloons()
+            
+            if st.button("🔄 New Game", use_container_width=True):
+                game['board'] = [' '] * 9
+                game['current_player'] = 'X'
+                game['game_over'] = False
+                game['winner'] = None
+                st.rerun()
+    
+    def check_ttt_winner(self, board):
+        """Check for Tic-Tac-Toe winner"""
+        win_combinations = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],  # rows
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],  # columns
+            [0, 4, 8], [2, 4, 6]              # diagonals
+        ]
+        
+        for combo in win_combinations:
+            if board[combo[0]] == board[combo[1]] == board[combo[2]] != ' ':
+                return board[combo[0]]
+        return None
     
 
     ###Written by Arya
