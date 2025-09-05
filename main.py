@@ -327,7 +327,7 @@ class StreamlitMiniGames:
    #Word_scramble 
     
     
-
+    
     ## quiz gamee
     
     def simple_quiz_game(self):
