@@ -608,7 +608,7 @@ def rock_paper_scissors(self):
             random.shuffle(scrambled)
         return ''.join(scrambled)
     
-
+    
     ## quiz gamee
     
     def simple_quiz_game(self):
