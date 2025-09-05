@@ -319,6 +319,82 @@ class StreamlitMiniGames:
         return games[selected_game]
    
   #number guessing 
+ 
+    def number_guessing_game(self):
+        """
+        Beautiful Number Guessing Game with Streamlit
+        Author: Dakshish
+        """
+        st.markdown("## 🎯 Number Guessing Game")
+        st.markdown("*I'm thinking of a number between 1 and 100. Can you guess it?*")
+        
+        # Initialize game state
+        if 'number_game' not in st.session_state:
+            st.session_state.number_game = {
+                'secret_number': random.randint(1, 100),
+                'attempts': 0,
+                'max_attempts': 7,
+                'game_over': False,
+                'won': False,
+                'hints': []
+            }
+        
+        game = st.session_state.number_game
+        
+        if not game['game_over']:
+            col1, col2 = st.columns([3, 1])
+            
+            with col1:
+                guess = st.number_input(
+                    f"Attempt {game['attempts'] + 1}/{game['max_attempts']} - Enter your guess:",
+                    min_value=1,
+                    max_value=100,
+                    value=50,
+                    key=f"guess_input_{game['attempts']}"
+                )
+            
+            with col2:
+                if st.button("🎯 Submit Guess", key="submit_guess"):
+                    game['attempts'] += 1
+                    
+                    if guess == game['secret_number']:
+                        game['won'] = True
+                        game['game_over'] = True
+                        score = max(100 - (game['attempts'] - 1) * 10, 10)
+                        self.update_stats('Number Guessing', score)
+                        
+                        st.markdown(f'<div class="winner-animation">🎉 Congratulations! You guessed it in {game["attempts"]} attempts!</div>', unsafe_allow_html=True)
+                        st.balloons()
+                        
+                    elif game['attempts'] >= game['max_attempts']:
+                        game['game_over'] = True
+                        st.error(f"😔 Game Over! The number was {game['secret_number']}")
+                        self.update_stats('Number Guessing', 0)
+                        
+                    else:
+                        if guess < game['secret_number']:
+                            hint = f"📈 Too low! Try a higher number."
+                            st.info(hint)
+                        else:
+                            hint = f"📉 Too high! Try a lower number."
+                            st.info(hint)
+                        
+                        game['hints'].append(f"Attempt {game['attempts']}: {guess} - {hint}")
+            
+            # Display hints history
+            if game['hints']:
+                st.markdown("### 💡 Previous Hints:")
+                for hint in game['hints'][-3:]:  # Show last 3 hints
+                    st.text(hint)
+            
+            # Progress bar
+            progress = game['attempts'] / game['max_attempts']
+            st.progress(progress)
+            
+        else:
+            if st.button("🔄 Play Again"):
+                del st.session_state.number_game
+                st.rerun()
 
 
   # rock_paper_scissors
